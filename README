@@ -1,0 +1,51 @@
+# Báo cáo Bài 4: Cấu hình tường lửa bảo vệ máy chủ (UFW & Cloud Firewall Integration)
+
+## 1. Thiết lập tường lửa Lớp 1: UFW (OS-level Firewall)
+Thực hiện cấu hình trên Droplet với chính sách chặn mặc định lưu lượng đi vào và mở các cổng cần thiết:
+
+```bash
+# Thiết lập chính sách mặc định
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# Mở các cổng dịch vụ cần thiết
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+
+# Kích hoạt UFW
+sudo ufw enable
+```
+
+### Kết quả đầu ra của lệnh `sudo ufw status verbose`:
+```text
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), disabled (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW IN    Anywhere                  
+80/tcp                     ALLOW IN    Anywhere                  
+22/tcp (v6)                ALLOW IN    Anywhere (v6)             
+80/tcp (v6)                ALLOW IN    Anywhere (v6)             
+```
+
+---
+
+## 2. Thiết lập tường lửa Lớp 2: Cloud Firewall (Infrastructure-level Firewall)
+- Đã tạo Cloud Firewall trên Console quản trị và gắn vào máy ảo Droplet.
+- **Inbound Rules:**
+  - `SSH` (TCP, Port 22): Cho phép từ `All IPv4`, `All IPv6`.
+  - `HTTP` (TCP, Port 80): Cho phép từ `All IPv4`, `All IPv6`.
+- **Outbound Rules:** Cho phép tất cả lưu lượng đi ra ngoài (All IPv4, All IPv6).
+
+### Ảnh chụp màn hình thiết lập Cloud Firewall:
+![Cloud Firewall Settings](./cloud-firewall.png)
+
+---
+
+## 3. Kiểm tra kết quả thực tế
+- **SSH (Port 22):** Kết nối terminal thành công bằng SSH key/mật khẩu.
+- **HTTP (Port 80):** Truy cập website bằng IP Droplet trên trình duyệt thành công.
+- **Các cổng dịch vụ khác:** Bị chặn hoàn toàn từ biên mạng và máy chủ an toàn trước các cuộc dò quét cổng trái phép.
